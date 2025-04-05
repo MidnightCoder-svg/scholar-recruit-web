@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -8,13 +8,14 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/hooks/use-toast';
 import { 
   Users, Briefcase, Building, CheckCircle, XCircle, 
   ArrowUpDown, Bell, FileText, BarChart
 } from 'lucide-react';
 
 // Mock data for pending approvals
-const pendingStudents = [
+const initialPendingStudents = [
   {
     id: '1',
     name: 'Alex Johnson',
@@ -33,7 +34,7 @@ const pendingStudents = [
   },
 ];
 
-const pendingCompanies = [
+const initialPendingCompanies = [
   {
     id: '1',
     name: 'InnovationTech',
@@ -53,7 +54,7 @@ const pendingCompanies = [
 ];
 
 // Mock data for job postings
-const jobPostings = [
+const initialJobPostings = [
   {
     id: '1',
     title: 'Software Engineering Intern',
@@ -85,6 +86,63 @@ const jobPostings = [
 
 const AdminDashboard = () => {
   const { user } = useAuth();
+  const { toast } = useToast();
+  
+  const [pendingStudents, setPendingStudents] = useState(initialPendingStudents);
+  const [pendingCompanies, setPendingCompanies] = useState(initialPendingCompanies);
+  const [jobPostings, setJobPostings] = useState(initialJobPostings);
+  
+  // Handle student approval/rejection
+  const handleStudentAction = (id: string, action: 'approve' | 'reject') => {
+    setPendingStudents(prev => prev.filter(student => student.id !== id));
+    
+    toast({
+      title: `Student ${action === 'approve' ? 'approved' : 'rejected'}`,
+      description: `The student account has been ${action === 'approve' ? 'approved' : 'rejected'}.`,
+    });
+  };
+  
+  // Handle company approval/rejection
+  const handleCompanyAction = (id: string, action: 'approve' | 'reject') => {
+    setPendingCompanies(prev => prev.filter(company => company.id !== id));
+    
+    toast({
+      title: `Company ${action === 'approve' ? 'approved' : 'rejected'}`,
+      description: `The company account has been ${action === 'approve' ? 'approved' : 'rejected'}.`,
+    });
+  };
+  
+  // Handle job posting approval/rejection
+  const handleJobAction = (id: string, action: 'approve' | 'reject') => {
+    setJobPostings(prev => 
+      prev.map(job => 
+        job.id === id 
+          ? { ...job, status: action === 'approve' ? 'Active' : 'Rejected' } 
+          : job
+      )
+    );
+    
+    toast({
+      title: `Job posting ${action === 'approve' ? 'approved' : 'rejected'}`,
+      description: `The job posting has been ${action === 'approve' ? 'approved' : 'rejected'}.`,
+    });
+  };
+  
+  // Handle sending announcements
+  const handleSendAnnouncement = () => {
+    toast({
+      title: "Announcement",
+      description: "This would open the announcement creation form.",
+    });
+  };
+  
+  // Handle viewing reports
+  const handleViewReports = () => {
+    toast({
+      title: "Reports",
+      description: "This would open the detailed reports page.",
+    });
+  };
   
   return (
     <div className="flex flex-col min-h-screen">
@@ -95,17 +153,13 @@ const AdminDashboard = () => {
           <div className="flex justify-between items-center mb-8">
             <h1 className="text-2xl font-bold">Admin Dashboard</h1>
             <div className="flex gap-3">
-              <Button asChild>
-                <Link to="/admin/announcements">
-                  <Bell className="h-4 w-4 mr-2" />
-                  Send Announcement
-                </Link>
+              <Button onClick={handleSendAnnouncement}>
+                <Bell className="h-4 w-4 mr-2" />
+                Send Announcement
               </Button>
-              <Button variant="outline" asChild>
-                <Link to="/admin/reports">
-                  <FileText className="h-4 w-4 mr-2" />
-                  Reports
-                </Link>
+              <Button variant="outline" onClick={handleViewReports}>
+                <FileText className="h-4 w-4 mr-2" />
+                Reports
               </Button>
             </div>
           </div>
@@ -118,8 +172,8 @@ const AdminDashboard = () => {
                   <p className="text-sm text-muted-foreground">Registered Students</p>
                   <p className="text-2xl font-bold">245</p>
                 </div>
-                <div className="p-2 bg-recruit-100 rounded-full">
-                  <Users className="h-6 w-6 text-recruit-600" />
+                <div className="p-2 bg-blue-100 rounded-full">
+                  <Users className="h-6 w-6 text-blue-600" />
                 </div>
               </CardContent>
             </Card>
@@ -130,8 +184,8 @@ const AdminDashboard = () => {
                   <p className="text-sm text-muted-foreground">Registered Companies</p>
                   <p className="text-2xl font-bold">32</p>
                 </div>
-                <div className="p-2 bg-recruit-100 rounded-full">
-                  <Building className="h-6 w-6 text-recruit-600" />
+                <div className="p-2 bg-green-100 rounded-full">
+                  <Building className="h-6 w-6 text-green-600" />
                 </div>
               </CardContent>
             </Card>
@@ -142,8 +196,8 @@ const AdminDashboard = () => {
                   <p className="text-sm text-muted-foreground">Active Job Postings</p>
                   <p className="text-2xl font-bold">{jobPostings.filter(job => job.status === 'Active').length}</p>
                 </div>
-                <div className="p-2 bg-recruit-100 rounded-full">
-                  <Briefcase className="h-6 w-6 text-recruit-600" />
+                <div className="p-2 bg-orange-100 rounded-full">
+                  <Briefcase className="h-6 w-6 text-orange-600" />
                 </div>
               </CardContent>
             </Card>
@@ -154,8 +208,8 @@ const AdminDashboard = () => {
                   <p className="text-sm text-muted-foreground">Students Placed</p>
                   <p className="text-2xl font-bold">78</p>
                 </div>
-                <div className="p-2 bg-recruit-100 rounded-full">
-                  <BarChart className="h-6 w-6 text-recruit-600" />
+                <div className="p-2 bg-purple-100 rounded-full">
+                  <BarChart className="h-6 w-6 text-purple-600" />
                 </div>
               </CardContent>
             </Card>
@@ -196,18 +250,33 @@ const AdminDashboard = () => {
                             </div>
                             
                             <div className="flex gap-2">
-                              <Button variant="outline" size="sm" className="text-green-600">
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                className="text-green-600"
+                                onClick={() => handleStudentAction(student.id, 'approve')}
+                              >
                                 <CheckCircle className="h-4 w-4 mr-1" />
                                 Approve
                               </Button>
-                              <Button variant="outline" size="sm" className="text-red-600">
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                className="text-red-600"
+                                onClick={() => handleStudentAction(student.id, 'reject')}
+                              >
                                 <XCircle className="h-4 w-4 mr-1" />
                                 Reject
                               </Button>
-                              <Button variant="outline" size="sm" asChild>
-                                <Link to={`/admin/student/${student.id}`}>
-                                  View Details
-                                </Link>
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                onClick={() => toast({
+                                  title: "Student Profile",
+                                  description: `Viewing details for: ${student.name}`
+                                })}
+                              >
+                                View Details
                               </Button>
                             </div>
                           </div>
@@ -251,18 +320,33 @@ const AdminDashboard = () => {
                             </div>
                             
                             <div className="flex gap-2">
-                              <Button variant="outline" size="sm" className="text-green-600">
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                className="text-green-600"
+                                onClick={() => handleCompanyAction(company.id, 'approve')}
+                              >
                                 <CheckCircle className="h-4 w-4 mr-1" />
                                 Approve
                               </Button>
-                              <Button variant="outline" size="sm" className="text-red-600">
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                className="text-red-600"
+                                onClick={() => handleCompanyAction(company.id, 'reject')}
+                              >
                                 <XCircle className="h-4 w-4 mr-1" />
                                 Reject
                               </Button>
-                              <Button variant="outline" size="sm" asChild>
-                                <Link to={`/admin/company/${company.id}`}>
-                                  View Details
-                                </Link>
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                onClick={() => toast({
+                                  title: "Company Profile",
+                                  description: `Viewing details for: ${company.name}`
+                                })}
+                              >
+                                View Details
                               </Button>
                             </div>
                           </div>
@@ -299,7 +383,10 @@ const AdminDashboard = () => {
                             <div className="flex items-center">
                               <p className="font-medium">{job.title}</p>
                               <Badge 
-                                variant={job.status === 'Active' ? 'default' : 'secondary'}
+                                variant={
+                                  job.status === 'Active' ? 'default' : 
+                                  job.status === 'Rejected' ? 'destructive' : 'secondary'
+                                }
                                 className="ml-2"
                               >
                                 {job.status}
@@ -319,20 +406,35 @@ const AdminDashboard = () => {
                           <div className="flex gap-2">
                             {job.status === 'Pending Review' && (
                               <>
-                                <Button variant="outline" size="sm" className="text-green-600">
+                                <Button 
+                                  variant="outline" 
+                                  size="sm" 
+                                  className="text-green-600"
+                                  onClick={() => handleJobAction(job.id, 'approve')}
+                                >
                                   <CheckCircle className="h-4 w-4 mr-1" />
                                   Approve
                                 </Button>
-                                <Button variant="outline" size="sm" className="text-red-600">
+                                <Button 
+                                  variant="outline" 
+                                  size="sm" 
+                                  className="text-red-600"
+                                  onClick={() => handleJobAction(job.id, 'reject')}
+                                >
                                   <XCircle className="h-4 w-4 mr-1" />
                                   Reject
                                 </Button>
                               </>
                             )}
-                            <Button variant="outline" size="sm" asChild>
-                              <Link to={`/jobs/${job.id}`}>
-                                View Details
-                              </Link>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => toast({
+                                title: "Job Details",
+                                description: `Viewing details for: ${job.title} at ${job.company}`
+                              })}
+                            >
+                              View Details
                             </Button>
                           </div>
                         </div>
@@ -367,7 +469,7 @@ const AdminDashboard = () => {
                             <span className="text-sm font-medium">42 students</span>
                           </div>
                           <div className="w-full bg-gray-200 rounded-full h-2">
-                            <div className="bg-recruit-600 h-2 rounded-full" style={{ width: '85%' }}></div>
+                            <div className="bg-blue-600 h-2 rounded-full" style={{ width: '85%' }}></div>
                           </div>
                         </div>
                         <div>
@@ -376,7 +478,7 @@ const AdminDashboard = () => {
                             <span className="text-sm font-medium">16 students</span>
                           </div>
                           <div className="w-full bg-gray-200 rounded-full h-2">
-                            <div className="bg-recruit-600 h-2 rounded-full" style={{ width: '65%' }}></div>
+                            <div className="bg-blue-600 h-2 rounded-full" style={{ width: '65%' }}></div>
                           </div>
                         </div>
                         <div>
@@ -385,7 +487,7 @@ const AdminDashboard = () => {
                             <span className="text-sm font-medium">10 students</span>
                           </div>
                           <div className="w-full bg-gray-200 rounded-full h-2">
-                            <div className="bg-recruit-600 h-2 rounded-full" style={{ width: '40%' }}></div>
+                            <div className="bg-blue-600 h-2 rounded-full" style={{ width: '40%' }}></div>
                           </div>
                         </div>
                         <div>
@@ -394,7 +496,7 @@ const AdminDashboard = () => {
                             <span className="text-sm font-medium">8 students</span>
                           </div>
                           <div className="w-full bg-gray-200 rounded-full h-2">
-                            <div className="bg-recruit-600 h-2 rounded-full" style={{ width: '30%' }}></div>
+                            <div className="bg-blue-600 h-2 rounded-full" style={{ width: '30%' }}></div>
                           </div>
                         </div>
                       </div>
@@ -409,7 +511,7 @@ const AdminDashboard = () => {
                             <span className="text-sm font-medium">12 offers</span>
                           </div>
                           <div className="w-full bg-gray-200 rounded-full h-2">
-                            <div className="bg-recruit-600 h-2 rounded-full" style={{ width: '80%' }}></div>
+                            <div className="bg-blue-600 h-2 rounded-full" style={{ width: '80%' }}></div>
                           </div>
                         </div>
                         <div>
@@ -418,7 +520,7 @@ const AdminDashboard = () => {
                             <span className="text-sm font-medium">8 offers</span>
                           </div>
                           <div className="w-full bg-gray-200 rounded-full h-2">
-                            <div className="bg-recruit-600 h-2 rounded-full" style={{ width: '60%' }}></div>
+                            <div className="bg-blue-600 h-2 rounded-full" style={{ width: '60%' }}></div>
                           </div>
                         </div>
                         <div>
@@ -427,7 +529,7 @@ const AdminDashboard = () => {
                             <span className="text-sm font-medium">6 offers</span>
                           </div>
                           <div className="w-full bg-gray-200 rounded-full h-2">
-                            <div className="bg-recruit-600 h-2 rounded-full" style={{ width: '45%' }}></div>
+                            <div className="bg-blue-600 h-2 rounded-full" style={{ width: '45%' }}></div>
                           </div>
                         </div>
                         <div>
@@ -436,7 +538,7 @@ const AdminDashboard = () => {
                             <span className="text-sm font-medium">5 offers</span>
                           </div>
                           <div className="w-full bg-gray-200 rounded-full h-2">
-                            <div className="bg-recruit-600 h-2 rounded-full" style={{ width: '35%' }}></div>
+                            <div className="bg-blue-600 h-2 rounded-full" style={{ width: '35%' }}></div>
                           </div>
                         </div>
                       </div>
@@ -444,11 +546,15 @@ const AdminDashboard = () => {
                   </div>
                   
                   <div className="flex justify-center mt-8">
-                    <Button variant="outline" asChild>
-                      <Link to="/admin/reports">
-                        <FileText className="h-4 w-4 mr-2" />
-                        View Detailed Reports
-                      </Link>
+                    <Button 
+                      variant="outline" 
+                      onClick={() => toast({
+                        title: "Detailed Reports",
+                        description: "This would open the detailed reports page."
+                      })}
+                    >
+                      <FileText className="h-4 w-4 mr-2" />
+                      View Detailed Reports
                     </Button>
                   </div>
                 </CardContent>

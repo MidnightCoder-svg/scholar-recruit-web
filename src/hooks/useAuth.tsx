@@ -1,5 +1,6 @@
+
 import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 
 export type UserRole = 'student' | 'company' | 'admin';
 
@@ -17,6 +18,7 @@ interface AuthContextType {
   login: (email: string, password: string, role: UserRole) => Promise<boolean>;
   register: (userData: RegisterData, role: UserRole) => Promise<boolean>;
   logout: () => void;
+  checkRole: (role: UserRole) => boolean;
 }
 
 export interface RegisterData {
@@ -132,6 +134,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       description: 'You have been logged out successfully.',
     });
   };
+  
+  // Check if user has specific role
+  const checkRole = (role: UserRole): boolean => {
+    return user?.role === role;
+  };
 
   return (
     <AuthContext.Provider
@@ -142,6 +149,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         login,
         register,
         logout,
+        checkRole,
       }}
     >
       {children}

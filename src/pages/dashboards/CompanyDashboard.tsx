@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -8,6 +8,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/hooks/use-toast';
 import { Briefcase, Users, Bell, Plus, Download, Eye, CheckCircle, XCircle } from 'lucide-react';
 
 // Mock data for job postings
@@ -33,7 +34,7 @@ const jobPostings = [
 ];
 
 // Mock data for applications
-const applications = [
+const initialApplications = [
   {
     id: '1',
     jobId: '1',
@@ -62,6 +63,38 @@ const applications = [
 
 const CompanyDashboard = () => {
   const { user } = useAuth();
+  const { toast } = useToast();
+  const [applications, setApplications] = useState(initialApplications);
+  
+  // Handle application status changes
+  const handleApplicationStatusChange = (id: string, newStatus: string) => {
+    setApplications(prev => 
+      prev.map(app => 
+        app.id === id ? { ...app, status: newStatus } : app
+      )
+    );
+    
+    toast({
+      title: "Status updated",
+      description: `Application status changed to ${newStatus}`,
+    });
+  };
+  
+  // Handle downloading resume
+  const handleDownloadResume = (studentName: string) => {
+    toast({
+      title: "Resume download started",
+      description: `Downloading ${studentName}'s resume`,
+    });
+    
+    // In a real application, this would trigger an actual download
+    setTimeout(() => {
+      toast({
+        title: "Resume downloaded",
+        description: `${studentName}'s resume has been downloaded successfully`,
+      });
+    }, 1500);
+  };
   
   return (
     <div className="flex flex-col min-h-screen">
@@ -72,14 +105,18 @@ const CompanyDashboard = () => {
           <div className="flex justify-between items-center mb-8">
             <h1 className="text-2xl font-bold">Company Dashboard</h1>
             <div className="flex gap-3">
-              <Button variant="outline" asChild>
-                <Link to="/company/profile">Edit Profile</Link>
+              <Button variant="outline" onClick={() => toast({
+                title: "Profile",
+                description: "Company profile page would open here"
+              })}>
+                Edit Profile
               </Button>
-              <Button asChild>
-                <Link to="/company/post-job">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Post New Job
-                </Link>
+              <Button onClick={() => toast({
+                title: "New Job",
+                description: "Job creation form would open here"
+              })}>
+                <Plus className="h-4 w-4 mr-2" />
+                Post New Job
               </Button>
             </div>
           </div>
@@ -92,8 +129,8 @@ const CompanyDashboard = () => {
                   <p className="text-sm text-muted-foreground">Active Job Postings</p>
                   <p className="text-2xl font-bold">{jobPostings.filter(job => job.status === 'Active').length}</p>
                 </div>
-                <div className="p-2 bg-recruit-100 rounded-full">
-                  <Briefcase className="h-6 w-6 text-recruit-600" />
+                <div className="p-2 bg-blue-100 rounded-full">
+                  <Briefcase className="h-6 w-6 text-blue-600" />
                 </div>
               </CardContent>
             </Card>
@@ -104,8 +141,8 @@ const CompanyDashboard = () => {
                   <p className="text-sm text-muted-foreground">Total Applicants</p>
                   <p className="text-2xl font-bold">{applications.length}</p>
                 </div>
-                <div className="p-2 bg-recruit-100 rounded-full">
-                  <Users className="h-6 w-6 text-recruit-600" />
+                <div className="p-2 bg-green-100 rounded-full">
+                  <Users className="h-6 w-6 text-green-600" />
                 </div>
               </CardContent>
             </Card>
@@ -116,8 +153,8 @@ const CompanyDashboard = () => {
                   <p className="text-sm text-muted-foreground">Scheduled Interviews</p>
                   <p className="text-2xl font-bold">{applications.filter(app => app.status === 'Interview Scheduled').length}</p>
                 </div>
-                <div className="p-2 bg-recruit-100 rounded-full">
-                  <Bell className="h-6 w-6 text-recruit-600" />
+                <div className="p-2 bg-orange-100 rounded-full">
+                  <Bell className="h-6 w-6 text-orange-600" />
                 </div>
               </CardContent>
             </Card>
@@ -162,16 +199,18 @@ const CompanyDashboard = () => {
                           </div>
                           
                           <div className="flex gap-2">
-                            <Button variant="outline" size="sm" asChild>
-                              <Link to={`/jobs/${job.id}`}>
-                                <Eye className="h-4 w-4 mr-1" />
-                                View
-                              </Link>
+                            <Button variant="outline" size="sm" onClick={() => toast({
+                              title: "View Job",
+                              description: `Viewing details for: ${job.title}`
+                            })}>
+                              <Eye className="h-4 w-4 mr-1" />
+                              View
                             </Button>
-                            <Button variant="outline" size="sm" asChild>
-                              <Link to={`/company/edit-job/${job.id}`}>
-                                Edit
-                              </Link>
+                            <Button variant="outline" size="sm" onClick={() => toast({
+                              title: "Edit Job",
+                              description: `Editing job: ${job.title}`
+                            })}>
+                              Edit
                             </Button>
                           </div>
                         </div>
@@ -184,8 +223,11 @@ const CompanyDashboard = () => {
                       <p className="text-muted-foreground mb-4">
                         You haven't posted any jobs or internships yet.
                       </p>
-                      <Button asChild>
-                        <Link to="/company/post-job">Post a Job</Link>
+                      <Button onClick={() => toast({
+                        title: "New Job",
+                        description: "Job creation form would open here"
+                      })}>
+                        Post a Job
                       </Button>
                     </div>
                   )}
@@ -231,20 +273,28 @@ const CompanyDashboard = () => {
                                 {application.status}
                               </Badge>
                               
-                              <Button variant="outline" size="sm" asChild>
-                                <a href="#">
-                                  <Download className="h-4 w-4 mr-1" />
-                                  Resume
-                                </a>
+                              <Button variant="outline" size="sm" onClick={() => handleDownloadResume(application.student)}>
+                                <Download className="h-4 w-4 mr-1" />
+                                Resume
                               </Button>
                               
                               {application.status === 'Under Review' && (
                                 <>
-                                  <Button variant="outline" size="sm" className="text-green-600">
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm" 
+                                    className="text-green-600"
+                                    onClick={() => handleApplicationStatusChange(application.id, 'Interview Scheduled')}
+                                  >
                                     <CheckCircle className="h-4 w-4 mr-1" />
                                     Approve
                                   </Button>
-                                  <Button variant="outline" size="sm" className="text-red-600">
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm" 
+                                    className="text-red-600"
+                                    onClick={() => handleApplicationStatusChange(application.id, 'Rejected')}
+                                  >
                                     <XCircle className="h-4 w-4 mr-1" />
                                     Reject
                                   </Button>
