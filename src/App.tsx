@@ -16,6 +16,8 @@ import JobDetail from "./pages/JobDetail";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import StudentProfile from "./pages/StudentProfile";
+import CompanyProfile from "./pages/CompanyProfile";
+import PostJob from "./pages/PostJob";
 
 // Dashboard Pages
 import StudentDashboard from "./pages/dashboards/StudentDashboard";
@@ -78,6 +80,22 @@ const App = () => (
               element={
                 <ProtectedRoute allowedRole="company">
                   <CompanyDashboard />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/company/profile" 
+              element={
+                <ProtectedRoute allowedRole="company">
+                  <CompanyProfile />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/company/post-job" 
+              element={
+                <ProtectedRoute allowedRole="company">
+                  <PostJob />
                 </ProtectedRoute>
               } 
             />

@@ -14,6 +14,9 @@ interface User {
   experience?: string;
   phone?: string;
   photoUrl?: string;
+  website?: string;
+  location?: string;
+  description?: string;
 }
 
 interface AuthContextType {
@@ -54,6 +57,10 @@ const mockUsers = [
     email: 'company@example.com',
     password: 'password',
     role: 'company' as UserRole,
+    phone: '555-123-4567',
+    location: 'San Francisco, CA',
+    website: 'https://techcompany.com',
+    description: 'Innovative tech company focused on creating cutting-edge solutions.',
   },
   {
     id: '3',

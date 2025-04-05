@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { Briefcase, Users, Bell, Plus, Download, Eye, CheckCircle, XCircle } from 'lucide-react';
@@ -64,6 +64,7 @@ const initialApplications = [
 const CompanyDashboard = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [applications, setApplications] = useState(initialApplications);
   
   // Handle application status changes
@@ -105,16 +106,15 @@ const CompanyDashboard = () => {
           <div className="flex justify-between items-center mb-8">
             <h1 className="text-2xl font-bold">Company Dashboard</h1>
             <div className="flex gap-3">
-              <Button variant="outline" onClick={() => toast({
-                title: "Profile",
-                description: "Company profile page would open here"
-              })}>
+              <Button 
+                variant="outline" 
+                onClick={() => navigate('/company/profile')}
+              >
                 Edit Profile
               </Button>
-              <Button onClick={() => toast({
-                title: "New Job",
-                description: "Job creation form would open here"
-              })}>
+              <Button 
+                onClick={() => navigate('/company/post-job')}
+              >
                 <Plus className="h-4 w-4 mr-2" />
                 Post New Job
               </Button>
