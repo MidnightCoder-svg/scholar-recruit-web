@@ -15,6 +15,7 @@ import JobsPage from "./pages/JobsPage";
 import JobDetail from "./pages/JobDetail";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
+import StudentProfile from "./pages/StudentProfile";
 
 // Dashboard Pages
 import StudentDashboard from "./pages/dashboards/StudentDashboard";
@@ -61,6 +62,14 @@ const App = () => (
               element={
                 <ProtectedRoute allowedRole="student">
                   <StudentDashboard />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/profile" 
+              element={
+                <ProtectedRoute allowedRole="student">
+                  <StudentProfile />
                 </ProtectedRoute>
               } 
             />

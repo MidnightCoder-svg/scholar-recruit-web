@@ -9,6 +9,11 @@ interface User {
   name: string;
   email: string;
   role: UserRole;
+  bio?: string;
+  skills?: string[];
+  education?: string;
+  experience?: string;
+  phone?: string;
 }
 
 interface AuthContextType {
@@ -19,6 +24,7 @@ interface AuthContextType {
   register: (userData: RegisterData, role: UserRole) => Promise<boolean>;
   logout: () => void;
   checkRole: (role: UserRole) => boolean;
+  updateProfile: (profileData: Partial<User>) => Promise<boolean>;
 }
 
 export interface RegisterData {
@@ -36,6 +42,11 @@ const mockUsers = [
     email: 'student@example.com',
     password: 'password',
     role: 'student' as UserRole,
+    bio: 'Computer Science student with passion for web development.',
+    skills: ['JavaScript', 'React', 'Node.js'],
+    education: 'B.Tech Computer Science, XYZ University',
+    experience: 'Intern at TechCorp (Summer 2024)',
+    phone: '123-456-7890',
   },
   {
     id: '2',
@@ -125,6 +136,32 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return true;
   };
 
+  const updateProfile = async (profileData: Partial<User>): Promise<boolean> => {
+    // In a real application, this would send data to an API
+    if (!user) {
+      toast({
+        title: 'Update failed',
+        description: 'You must be logged in to update your profile.',
+        variant: 'destructive',
+      });
+      return false;
+    }
+
+    // Update the user object
+    const updatedUser = { ...user, ...profileData };
+    setUser(updatedUser);
+    
+    // Save to localStorage
+    localStorage.setItem('user', JSON.stringify(updatedUser));
+    
+    toast({
+      title: 'Profile updated',
+      description: 'Your profile has been updated successfully.',
+    });
+    
+    return true;
+  };
+
   const logout = () => {
     setUser(null);
     localStorage.removeItem('user');
@@ -150,6 +187,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         register,
         logout,
         checkRole,
+        updateProfile,
       }}
     >
       {children}
