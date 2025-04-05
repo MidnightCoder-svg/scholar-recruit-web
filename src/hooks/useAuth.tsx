@@ -1,4 +1,3 @@
-
 import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -14,6 +13,7 @@ interface User {
   education?: string;
   experience?: string;
   phone?: string;
+  photoUrl?: string;
 }
 
 interface AuthContextType {
@@ -25,6 +25,7 @@ interface AuthContextType {
   logout: () => void;
   checkRole: (role: UserRole) => boolean;
   updateProfile: (profileData: Partial<User>) => Promise<boolean>;
+  updateProfilePhoto: (photoBlob: Blob) => Promise<boolean>;
 }
 
 export interface RegisterData {
@@ -34,7 +35,6 @@ export interface RegisterData {
   [key: string]: string | undefined;
 }
 
-// Mock users for demonstration
 const mockUsers = [
   {
     id: '1',
@@ -70,7 +70,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const { toast } = useToast();
   
-  // Check for saved auth on component mount
   useEffect(() => {
     const savedUser = localStorage.getItem('user');
     if (savedUser) {
@@ -84,7 +83,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const login = async (email: string, password: string, role: UserRole): Promise<boolean> => {
-    // In a real application, this would be an API request
     const user = mockUsers.find(
       (u) => u.email === email && u.password === password && u.role === role
     );
@@ -112,8 +110,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const register = async (userData: RegisterData, role: UserRole): Promise<boolean> => {
-    // In a real app, this would be an API request
-    // Check if email is already in use
     const emailExists = mockUsers.some((u) => u.email === userData.email);
     
     if (emailExists) {
@@ -125,7 +121,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       return false;
     }
 
-    // Registration successful
     toast({
       title: 'Registration successful',
       description: role === 'company' 
@@ -137,7 +132,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const updateProfile = async (profileData: Partial<User>): Promise<boolean> => {
-    // In a real application, this would send data to an API
     if (!user) {
       toast({
         title: 'Update failed',
@@ -147,11 +141,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       return false;
     }
 
-    // Update the user object
     const updatedUser = { ...user, ...profileData };
     setUser(updatedUser);
     
-    // Save to localStorage
     localStorage.setItem('user', JSON.stringify(updatedUser));
     
     toast({
@@ -160,6 +152,43 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     });
     
     return true;
+  };
+
+  const updateProfilePhoto = async (photoBlob: Blob): Promise<boolean> => {
+    if (!user) {
+      toast({
+        title: 'Update failed',
+        description: 'You must be logged in to update your profile photo.',
+        variant: 'destructive',
+      });
+      return false;
+    }
+    
+    try {
+      const photoUrl = URL.createObjectURL(photoBlob);
+      
+      const updatedUser = { ...user, photoUrl };
+      setUser(updatedUser);
+      
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      
+      toast({
+        title: 'Photo updated',
+        description: 'Your profile photo has been updated successfully.',
+      });
+      
+      return true;
+    } catch (error) {
+      console.error('Error updating profile photo:', error);
+      
+      toast({
+        title: 'Update failed',
+        description: 'There was an error updating your profile photo.',
+        variant: 'destructive',
+      });
+      
+      return false;
+    }
   };
 
   const logout = () => {
@@ -172,7 +201,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     });
   };
   
-  // Check if user has specific role
   const checkRole = (role: UserRole): boolean => {
     return user?.role === role;
   };
@@ -188,6 +216,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         logout,
         checkRole,
         updateProfile,
+        updateProfilePhoto,
       }}
     >
       {children}

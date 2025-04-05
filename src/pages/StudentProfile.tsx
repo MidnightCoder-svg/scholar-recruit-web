@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
@@ -13,7 +13,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/hooks/useAuth';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import { User, Pencil } from 'lucide-react';
+import { User, Pencil, Upload, Image, Camera } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 // Form validation schema
 const profileFormSchema = z.object({
@@ -30,8 +31,11 @@ type ProfileFormValues = z.infer<typeof profileFormSchema>;
 
 const StudentProfile = () => {
   const navigate = useNavigate();
-  const { user, updateProfile } = useAuth();
+  const { user, updateProfile, updateProfilePhoto } = useAuth();
+  const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   // Initialize the form with current user data
   const form = useForm<ProfileFormValues>({
@@ -66,6 +70,65 @@ const StudentProfile = () => {
     }
   };
 
+  const handlePhotoClick = () => {
+    // Trigger the hidden file input when the avatar is clicked
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
+  const handlePhotoChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
+
+    const file = files[0];
+    
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: 'Invalid file type',
+        description: 'Please upload an image file (JPEG, PNG, etc.).',
+        variant: 'destructive',
+      });
+      return;
+    }
+    
+    // Validate file size (max 5MB)
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+      toast({
+        title: 'File too large',
+        description: 'Please upload an image smaller than 5MB.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    
+    try {
+      setIsUploading(true);
+      const success = await updateProfilePhoto(file);
+      if (success) {
+        toast({
+          title: 'Photo updated',
+          description: 'Your profile photo has been updated successfully.',
+        });
+      }
+    } catch (error) {
+      console.error('Error uploading photo:', error);
+      toast({
+        title: 'Upload failed',
+        description: 'There was an error uploading your photo.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsUploading(false);
+      // Reset the file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
   // If not logged in or not a student, navigate away
   if (!user || user.role !== 'student') {
     navigate('/login');
@@ -91,15 +154,44 @@ const StudentProfile = () => {
           <Card>
             <CardHeader className="pb-4">
               <CardTitle className="flex items-center gap-4">
-                <Avatar className="h-16 w-16">
-                  <AvatarImage src="" alt={user?.name} />
-                  <AvatarFallback className="bg-primary text-primary-foreground text-xl">
-                    {user?.name.substring(0, 2).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
+                <div className="relative group">
+                  <Avatar className="h-20 w-20 cursor-pointer hover:opacity-80 transition-opacity" onClick={handlePhotoClick}>
+                    <AvatarImage src={user?.photoUrl || ""} alt={user?.name} />
+                    <AvatarFallback className="bg-primary text-primary-foreground text-xl">
+                      {user?.name.substring(0, 2).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  
+                  {/* Hidden file input for photo upload */}
+                  <input 
+                    type="file" 
+                    ref={fileInputRef}
+                    className="hidden"
+                    accept="image/*"
+                    onChange={handlePhotoChange}
+                  />
+                  
+                  {/* Camera icon overlay */}
+                  <div 
+                    className="absolute bottom-0 right-0 bg-primary text-white p-1 rounded-full cursor-pointer hover:bg-primary/90 transition-colors"
+                    onClick={handlePhotoClick}
+                  >
+                    <Camera size={16} />
+                  </div>
+                </div>
                 <div>
                   <p className="text-xl">{user?.name}</p>
                   <p className="text-muted-foreground">{user?.email}</p>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="mt-1 p-0 h-auto text-xs flex items-center gap-1 hover:bg-transparent"
+                    onClick={handlePhotoClick}
+                    disabled={isUploading}
+                  >
+                    <Upload size={14} />
+                    {isUploading ? "Uploading..." : "Upload photo"}
+                  </Button>
                 </div>
               </CardTitle>
             </CardHeader>
