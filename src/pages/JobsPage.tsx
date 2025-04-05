@@ -79,8 +79,8 @@ const jobListings = [
 
 const JobsPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [jobType, setJobType] = useState<string>('');
-  const [location, setLocation] = useState<string>('');
+  const [jobType, setJobType] = useState<string>('all');
+  const [location, setLocation] = useState<string>('all');
   
   // Filter jobs based on search and filters
   const filteredJobs = jobListings.filter((job) => {
@@ -90,11 +90,11 @@ const JobsPage = () => {
       job.company.toLowerCase().includes(searchTerm.toLowerCase());
     
     // Job type filter
-    const matchesType = jobType === '' || job.type === jobType;
+    const matchesType = jobType === 'all' || job.type === jobType;
     
     // Location filter
     const matchesLocation = 
-      location === '' || 
+      location === 'all' || 
       job.location.toLowerCase().includes(location.toLowerCase());
     
     return matchesSearch && matchesType && matchesLocation;
@@ -103,8 +103,8 @@ const JobsPage = () => {
   // Reset all filters
   const resetFilters = () => {
     setSearchTerm('');
-    setJobType('');
-    setLocation('');
+    setJobType('all');
+    setLocation('all');
   };
 
   return (
@@ -138,7 +138,7 @@ const JobsPage = () => {
                     <SelectValue placeholder="Job Type" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Types</SelectItem>
+                    <SelectItem value="all">All Types</SelectItem>
                     <SelectItem value="Internship">Internship</SelectItem>
                     <SelectItem value="Full-time">Full-time</SelectItem>
                     <SelectItem value="Part-time">Part-time</SelectItem>
@@ -150,7 +150,7 @@ const JobsPage = () => {
                     <SelectValue placeholder="Location" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Locations</SelectItem>
+                    <SelectItem value="all">All Locations</SelectItem>
                     <SelectItem value="Remote">Remote</SelectItem>
                     <SelectItem value="New York">New York</SelectItem>
                     <SelectItem value="San Francisco">San Francisco</SelectItem>
@@ -168,7 +168,7 @@ const JobsPage = () => {
             </div>
             
             {/* Active filters */}
-            {(searchTerm || jobType || location) && (
+            {(searchTerm || jobType !== 'all' || location !== 'all') && (
               <div className="flex flex-wrap gap-2 mt-4">
                 <div className="text-sm text-muted-foreground mr-2 mt-1">Active filters:</div>
                 
@@ -184,24 +184,24 @@ const JobsPage = () => {
                   </Badge>
                 )}
                 
-                {jobType && (
+                {jobType !== 'all' && (
                   <Badge variant="secondary" className="rounded-full">
                     Type: {jobType}
                     <button 
                       className="ml-1 text-xs"
-                      onClick={() => setJobType('')}
+                      onClick={() => setJobType('all')}
                     >
                       ×
                     </button>
                   </Badge>
                 )}
                 
-                {location && (
+                {location !== 'all' && (
                   <Badge variant="secondary" className="rounded-full">
                     Location: {location}
                     <button 
                       className="ml-1 text-xs"
-                      onClick={() => setLocation('')}
+                      onClick={() => setLocation('all')}
                     >
                       ×
                     </button>
