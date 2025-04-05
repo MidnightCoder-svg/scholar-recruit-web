@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { z } from 'zod';
@@ -9,7 +8,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { useAuth, UserRole } from '@/hooks/useAuth';
+import { useAuth, UserRole, RegisterData } from '@/hooks/useAuth';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 
@@ -79,7 +78,16 @@ const Register = () => {
   const onStudentSubmit = async (data: StudentFormValues) => {
     setIsLoading(true);
     try {
-      const success = await register(data, 'student');
+      const registerData: RegisterData = {
+        name: data.name,
+        email: data.email,
+        password: data.password,
+        college: data.college,
+        degree: data.degree,
+        graduationYear: data.graduationYear,
+      };
+      
+      const success = await register(registerData, 'student');
       if (success) {
         navigate('/login');
       }
@@ -91,7 +99,16 @@ const Register = () => {
   const onCompanySubmit = async (data: CompanyFormValues) => {
     setIsLoading(true);
     try {
-      const success = await register(data, 'company');
+      const registerData: RegisterData = {
+        name: data.name,
+        email: data.email,
+        password: data.password,
+        website: data.website || undefined,
+        industry: data.industry,
+        location: data.location,
+      };
+      
+      const success = await register(registerData, 'company');
       if (success) {
         navigate('/login');
       }

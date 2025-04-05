@@ -1,4 +1,3 @@
-
 import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 
@@ -20,11 +19,11 @@ interface AuthContextType {
   logout: () => void;
 }
 
-interface RegisterData {
+export interface RegisterData {
   name: string;
   email: string;
   password: string;
-  [key: string]: string;
+  [key: string]: string | undefined;
 }
 
 // Mock users for demonstration
