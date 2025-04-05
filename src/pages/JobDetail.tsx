@@ -50,7 +50,7 @@ const jobsData = [
         <li>Possibility of full-time employment after graduation</li>
       </ul>
     `,
-    qualifications: 'Bachelor's degree in Computer Science or related field (in progress)',
+    qualifications: "Bachelor's degree in Computer Science or related field (in progress)",
     skills: ['JavaScript', 'React', 'Node.js', 'Git', 'Problem-solving'],
     salary: '$20-25/hour',
     duration: '12 weeks (Summer 2025)',
@@ -94,7 +94,7 @@ const jobsData = [
         <li>Flexible work schedule</li>
       </ul>
     `,
-    qualifications: 'Bachelor's degree in Statistics, Mathematics, Computer Science, or related field',
+    qualifications: "Bachelor's degree in Statistics, Mathematics, Computer Science, or related field",
     skills: ['SQL', 'Python', 'Tableau', 'Excel', 'Statistical Analysis'],
     salary: '$70,000 - $90,000/year',
     duration: 'Permanent',
