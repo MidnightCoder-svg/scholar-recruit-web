@@ -1,63 +1,91 @@
 
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 
 const Header = () => {
+  const location = useLocation();
   const { isAuthenticated, userRole, logout } = useAuth();
 
   return (
-    <header className="bg-white border-b border-gray-200">
-      <div className="container mx-auto px-4">
-        <div className="flex justify-between items-center h-16">
-          <div className="flex items-center">
-            <Link to="/" className="text-xl font-bold text-recruit-600">
-              ScholarRecruit
-            </Link>
-            
-            <nav className="hidden md:flex ml-10 space-x-6">
-              <Link to="/jobs" className="text-gray-600 hover:text-recruit-600">
-                Jobs
-              </Link>
-              <Link to="/about" className="text-gray-600 hover:text-recruit-600">
-                About
-              </Link>
-              <Link to="/contact" className="text-gray-600 hover:text-recruit-600">
-                Contact
-              </Link>
-            </nav>
-          </div>
-          
-          <div className="flex items-center">
-            {isAuthenticated ? (
-              <>
-                <Link 
-                  to={`/${userRole}/dashboard`} 
-                  className="text-gray-600 hover:text-recruit-600 mr-6"
-                >
-                  Dashboard
-                </Link>
-                <Button variant="outline" onClick={logout}>
-                  Logout
-                </Button>
-              </>
-            ) : (
-              <>
-                <Link 
-                  to="/login" 
-                  className="text-gray-600 hover:text-recruit-600 mr-6"
-                >
-                  Login
-                </Link>
-                <Button asChild>
-                  <Link to="/register">
-                    Register
-                  </Link>
-                </Button>
-              </>
-            )}
-          </div>
+    <header className="border-b border-border">
+      <div className="container flex items-center justify-between h-16 px-4 mx-auto sm:px-6">
+        <Link to="/" className="text-2xl font-bold text-recruit-800">
+          ScholarRecruit
+        </Link>
+        
+        <nav className="hidden md:flex items-center space-x-6">
+          <Link 
+            to="/" 
+            className={`text-sm font-medium transition-colors hover:text-primary ${
+              location.pathname === '/' ? 'text-primary' : 'text-muted-foreground'
+            }`}
+          >
+            Home
+          </Link>
+          <Link 
+            to="/jobs" 
+            className={`text-sm font-medium transition-colors hover:text-primary ${
+              location.pathname === '/jobs' ? 'text-primary' : 'text-muted-foreground'
+            }`}
+          >
+            Jobs
+          </Link>
+          <Link 
+            to="/about" 
+            className={`text-sm font-medium transition-colors hover:text-primary ${
+              location.pathname === '/about' ? 'text-primary' : 'text-muted-foreground'
+            }`}
+          >
+            About
+          </Link>
+          <Link 
+            to="/contact" 
+            className={`text-sm font-medium transition-colors hover:text-primary ${
+              location.pathname === '/contact' ? 'text-primary' : 'text-muted-foreground'
+            }`}
+          >
+            Contact
+          </Link>
+        </nav>
+
+        <div className="flex items-center space-x-4">
+          {isAuthenticated ? (
+            <>
+              <Button 
+                variant="ghost" 
+                size="sm"
+                asChild
+              >
+                <Link to={`/${userRole}/dashboard`}>Dashboard</Link>
+              </Button>
+              <Button 
+                variant="default" 
+                size="sm"
+                onClick={logout}
+              >
+                Logout
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button 
+                variant="ghost" 
+                size="sm"
+                asChild
+              >
+                <Link to="/login">Login</Link>
+              </Button>
+              <Button 
+                variant="default" 
+                size="sm"
+                asChild
+              >
+                <Link to="/register">Register</Link>
+              </Button>
+            </>
+          )}
         </div>
       </div>
     </header>
