@@ -12,7 +12,7 @@ $user = getCurrentUser();
 $page_title = "Post a Job";
 include 'includes/header.php';
 
-// Handle job submission
+// Handle form submission
 $success_message = '';
 $error_message = '';
 
@@ -33,19 +33,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $error_message = 'Please fill out all required fields.';
     } else {
         // Insert job into database
-        $sql = "INSERT INTO jobs (company_id, title, description, location, type, salary, 
-                               deadline, qualifications, skills, duration) 
+        $sql = "INSERT INTO jobs (company_id, title, description, location, type, salary, deadline, qualifications, skills, duration) 
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param("isssssssss", $user['id'], $title, $description, $location, 
-                         $type, $salary, $deadline, $qualifications, $skills, $duration);
+        $stmt->bind_param("isssssssss", $user['id'], $title, $description, $location, $type, 
+                         $salary, $deadline, $qualifications, $skills, $duration);
         
         if ($stmt->execute()) {
-            $job_id = $stmt->insert_id;
+            $job_id = $conn->insert_id;
             $success_message = 'Job posted successfully!';
-            
-            // Redirect to the job details page after a short delay
-            header("refresh:2;url=job_details.php?id=$job_id");
         } else {
             $error_message = 'Error posting job: ' . $conn->error;
         }
@@ -83,6 +79,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <?php if (!empty($success_message)): ?>
                 <div class="alert alert-success alert-dismissible fade show" role="alert">
                     <?= $success_message ?>
+                    <a href="job_details.php?id=<?= $job_id ?>" class="alert-link">View Job Posting</a>
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             <?php endif; ?>
@@ -96,14 +93,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             
             <div class="card">
                 <div class="card-header bg-light">
-                    <h5 class="mb-0">Post a New Job Opportunity</h5>
+                    <h5 class="mb-0">Post a New Job</h5>
                 </div>
                 <div class="card-body">
                     <form action="post_job.php" method="post">
                         <div class="row g-3">
                             <div class="col-md-12">
                                 <label for="title" class="form-label">Job Title *</label>
-                                <input type="text" class="form-control" id="title" name="title" required>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-briefcase"></i></span>
+                                    <input type="text" class="form-control" id="title" name="title" placeholder="e.g. Software Engineering Intern" required>
+                                </div>
                             </div>
                             
                             <div class="col-md-6">
@@ -114,45 +114,55 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                     <option value="Part-time">Part-time</option>
                                     <option value="Internship">Internship</option>
                                     <option value="Contract">Contract</option>
+                                    <option value="Remote">Remote</option>
                                 </select>
                             </div>
                             
                             <div class="col-md-6">
                                 <label for="location" class="form-label">Location *</label>
-                                <input type="text" class="form-control" id="location" name="location" placeholder="City, State, Country or Remote" required>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-geo-alt"></i></span>
+                                    <input type="text" class="form-control" id="location" name="location" placeholder="e.g. New York, NY or Remote" required>
+                                </div>
                             </div>
                             
                             <div class="col-md-6">
                                 <label for="salary" class="form-label">Salary/Compensation</label>
-                                <input type="text" class="form-control" id="salary" name="salary" placeholder="e.g. $50,000 - $70,000 per year">
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-currency-dollar"></i></span>
+                                    <input type="text" class="form-control" id="salary" name="salary" placeholder="e.g. $50,000 - $70,000 per year">
+                                </div>
                             </div>
                             
                             <div class="col-md-6">
                                 <label for="duration" class="form-label">Duration</label>
-                                <input type="text" class="form-control" id="duration" name="duration" placeholder="e.g. 3 months, 1 year, Permanent">
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-clock"></i></span>
+                                    <input type="text" class="form-control" id="duration" name="duration" placeholder="e.g. 3 months, 1 year, Permanent">
+                                </div>
                             </div>
                             
                             <div class="col-md-6">
                                 <label for="deadline" class="form-label">Application Deadline *</label>
-                                <input type="date" class="form-control" id="deadline" name="deadline" min="<?= date('Y-m-d') ?>" required>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-calendar"></i></span>
+                                    <input type="date" class="form-control" id="deadline" name="deadline" required>
+                                </div>
                             </div>
                             
                             <div class="col-md-12">
                                 <label for="description" class="form-label">Job Description *</label>
-                                <textarea class="form-control" id="description" name="description" rows="5" required></textarea>
-                                <div class="form-text">Include responsibilities, expectations, and other relevant details.</div>
+                                <textarea class="form-control" id="description" name="description" rows="5" placeholder="Include responsibilities, expectations, and other relevant details" required></textarea>
                             </div>
                             
                             <div class="col-md-12">
                                 <label for="qualifications" class="form-label">Qualifications</label>
-                                <textarea class="form-control" id="qualifications" name="qualifications" rows="4"></textarea>
-                                <div class="form-text">List required education, certifications, or experience.</div>
+                                <textarea class="form-control" id="qualifications" name="qualifications" rows="4" placeholder="List required education, certifications, or experience"></textarea>
                             </div>
                             
                             <div class="col-md-12">
                                 <label for="skills" class="form-label">Required Skills</label>
-                                <textarea class="form-control" id="skills" name="skills" rows="2"></textarea>
-                                <div class="form-text">Separate skills with commas (e.g. JavaScript, PHP, Communication)</div>
+                                <textarea class="form-control" id="skills" name="skills" rows="2" placeholder="Separate skills with commas (e.g. JavaScript, PHP, Communication)"></textarea>
                             </div>
                             
                             <div class="col-12">
